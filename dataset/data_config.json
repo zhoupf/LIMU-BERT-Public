@@ -1,0 +1,131 @@
+{
+    "eleme_10_100": {
+        "sr": 10,
+        "seq_len": 100,
+        "dimension": 9,
+        "activity_label_index": 1,
+        "activity_label_size": 4,
+        "activity_label": [
+            "still", "walk", "run", "ride"
+        ],
+        "user_label_index": 0,
+        "user_label_size": 7,
+        "size": 20831
+    },
+    "hhar_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 6,
+        "activity_label_index": 2,
+        "activity_label_size": 6,
+        "activity_label": [
+            "bike", "sit", "downstairs", "upstairs", "stand", "walk"
+        ],
+        "user_label_index": 0,
+        "user_label_size": 9,
+        "model_label_index": 1,
+        "model_label_size": 3,
+        "size": 9166
+    },
+    "huawei_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 9,
+        "activity_label_index": 0,
+        "activity_label_size": 3,
+        "activity_label": [
+            "still", "walk", "run"
+        ],
+        "user_label_index": 2,
+        "user_label_size": 3,
+        "position_label_index": 1,
+        "position_label_size": 4,
+        "position_label": [
+            "bag", "hand", "torso", "hips"
+        ],
+        "size": 50756
+    },
+    "huawei_20_120f": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 9,
+        "activity_label_index": 0,
+        "activity_label_size": 5,
+        "activity_label": [
+            "still", "walk", "run", "bike", "car/bus"
+        ],
+        "user_label_index": 2,
+        "user_label_size": 3,
+        "position_label_index": 1,
+        "position_label_size": 4,
+        "position_label": [
+            "bag", "hand", "torso", "hips"
+        ],
+        "size": 50756
+    },
+    "motion_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 6,
+        "activity_label_index": 0,
+        "activity_label_size": 6,
+        "activity_label": [
+            "downstairs", "upstairs", "sitting", "standing", "walking", "jogging"
+        ],
+        "user_label_index": 1,
+        "user_label_size": 24,
+        "size": 4534
+    },
+    "uci_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 6,
+        "activity_label_index": 0,
+        "activity_label_size": 6,
+        "activity_label": [
+            "standing", "sitting", "lying", "walking", "downstairs", "upstairs"
+        ],
+        "user_label_index": 1,
+        "user_label_size": 30,
+        "size": 2088
+    },
+    "shoaib_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 9,
+        "activity_label_index": 0,
+        "activity_label_size": 7,
+        "activity_label": [
+            "walking", "sitting", "standing", "jogging", "biking", "upstairs" , "downstairs"
+        ],
+        "position_label_index": 1,
+        "position_label_size": 5,
+        "position_label": [
+            "left_pocket", "right_pocket", "wrist", "upper_arm", "belt"
+        ],
+        "user_label_index": 2,
+        "user_label_size": 10,
+        "size": 10500
+    },
+    "wisdm_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 3,
+        "activity_label_index": 1,
+        "activity_label_size": 6,
+        "activity_label": [
+            "walking", "jogging", "sitting", "standing", "upstairs", "downstairs"
+        ],
+        "user_label_index": 0,
+        "user_label_size": 36,
+        "size": 2411
+    },
+    "merge_20_120": {
+        "sr": 20,
+        "seq_len": 120,
+        "dimension": 6,
+        "activity_label_index": 0,
+        "size": 26288
+    }
+}
+
