@@ -9,7 +9,7 @@
 import os
 import numpy as np
 
-from utils import prepare_pretrain_dataset, set_seeds, prepare_embedding_dataset
+from utils import prepare_pretrain_dataset, set_seeds, partition_and_reshape
 
 
 def merge_simple(datasets, versions, label_indexes, feature_num=6):
@@ -65,8 +65,8 @@ def merge(datasets, versions, label_indexes, feature_num=6, training_rate=0.8, s
         data = np.load(path_data).astype(np.float32)
         label = np.load(path_label).astype(np.float32)
         set_seeds(seed)
-        data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_embedding_dataset(data, label,
-                                     label_index=label_indexes[d], training_rate=training_rate, vali_rate=0.1, change_shape=False)
+        data_train, label_train, data_vali, label_vali, data_test, label_test \
+            = partition_and_reshape(data, label, label_index=label_indexes[d], training_rate=training_rate, vali_rate=0.1, change_shape=False)
         data_train_merge.append(data_train[:, :, :feature_num])
         data_vali_merge.append(data_vali[:, :, :feature_num])
         data_test_merge.append(data_test[:, :, :feature_num])

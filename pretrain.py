@@ -19,7 +19,7 @@ import models, train
 from config import MaskConfig, TrainConfig, PretrainModelConfig
 from models import LIMUBertModel4Pretrain
 from utils import set_seeds, get_device \
-    , LIBERTDataset4Pretrain, handle_argv, load_pretrain_data_config, prepare_dataset, \
+    , LIBERTDataset4Pretrain, handle_argv, load_pretrain_data_config, prepare_classifier_dataset, \
     prepare_pretrain_dataset, Preprocess4Normalization,  Preprocess4Mask
 
 
@@ -40,11 +40,11 @@ def main(args, training_rate):
 
     optimizer = torch.optim.Adam(params=model.parameters(), lr=train_cfg.lr)
     device = get_device(args.gpu)
-    trainer = train.Trainer(train_cfg, model, data_loader_train, optimizer, args.save_path, device)
+    trainer = train.Trainer(train_cfg, model, optimizer, args.save_path, device)
 
-    writer = SummaryWriter(log_dir=args.log_dir)
+    # writer = SummaryWriter(log_dir=args.log_dir)
 
-    def get_loss(model, batch): # make sure loss is tensor
+    def func_loss(model, batch): # make sure loss is tensor
         mask_seqs, masked_pos, seqs = batch #, mask_norms
 
         logits_lm = model(mask_seqs, masked_pos) #, mask_norms
@@ -52,17 +52,20 @@ def main(args, training_rate):
         # loss_lm = (loss_lm.float()).mean()
         return loss_lm
 
-    def evaluate_mask(gt, es):
-        es_t = torch.from_numpy(es)
-        gt_t = torch.from_numpy(gt)
-        loss_lm = criterion(es_t, gt_t)
+    def func_forward(model, batch):
+        mask_seqs, masked_pos, seqs = batch
+        seq_recon = model(mask_seqs, masked_pos)
+        return seq_recon, seqs
+
+    def func_evaluate(seqs, predict_seqs):
+        loss_lm = criterion(predict_seqs, seqs)
         return loss_lm.mean().cpu().numpy()
 
     if hasattr(args, 'pretrain_model'):
-        trainer.train(get_loss, evaluate=evaluate_mask, data_loader_test=data_loader_test
+        trainer.pretrain(func_loss, func_forward, func_evaluate, data_loader_train, data_loader_test
                       , model_file=args.pretrain_model)
     else:
-        trainer.train(get_loss, evaluate=evaluate_mask, data_loader_test=data_loader_test, model_file=None)
+        trainer.pretrain(func_loss, func_forward, func_evaluate, data_loader_train, data_loader_test, model_file=None)
 
 
 if __name__ == "__main__":

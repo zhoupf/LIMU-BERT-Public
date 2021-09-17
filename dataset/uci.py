@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 
-DATASET_PATH = r'D:\Dataset_Mobility\UCI\RawData'
+DATASET_PATH = r'F:\Dataset_Mobility\UCI HAR Dataset Raw\RawData'
 
 
 def down_sample(data, window_sample, start, end):

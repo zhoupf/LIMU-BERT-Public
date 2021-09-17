@@ -17,23 +17,20 @@ from config import load_dataset_label_names
 from models import BERTClassifier, fetch_classifier
 
 from statistic import stat_acc_f1
-from utils import get_device, regularization_loss, prepare_embedding_dataset, handle_argv \
-    , IMUDataset, load_bert_classifier_data_config, prepare_embedding_dataset_balance, Preprocess4Normalization, \
-    prepare_dataset
+from utils import get_device,  handle_argv \
+    , IMUDataset, load_bert_classifier_data_config, Preprocess4Normalization, \
+    prepare_classifier_dataset
 
 
 def bert_classify(args, label_index, training_rate, label_rate, frozen_bert=False, balance=True):
     data, labels, train_cfg, model_bert_cfg, model_classifier_cfg, dataset_cfg = load_bert_classifier_data_config(args)
     label_names, label_num = load_dataset_label_names(dataset_cfg, label_index)
 
-    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_dataset(data, labels
-                                                                                            , label_index=label_index,
-                                                                                            training_rate=training_rate,
-                                                                                            label_rate=label_rate
-                                                                                            , merge=model_classifier_cfg.seq_len,
-                                                                                            seed=train_cfg.seed,
-                                                                                            balance=balance)
-    pipeline = [Preprocess4Normalization(model_bert_cfg.cross_num * 3)]
+    data_train, label_train, data_vali, label_vali, data_test, label_test \
+        = prepare_classifier_dataset(data, labels, label_index=label_index, training_rate=training_rate,
+                                     label_rate=label_rate, merge=model_classifier_cfg.seq_len, seed=train_cfg.seed
+                                     , balance=balance)
+    pipeline = [Preprocess4Normalization(model_bert_cfg.feature_num)]
     data_set_train = IMUDataset(data_train, label_train, pipeline=pipeline)
     data_loader_train = DataLoader(data_set_train, shuffle=True, batch_size=train_cfg.batch_size)
     data_set_test = IMUDataset(data_test, label_test, pipeline=pipeline)
@@ -45,17 +42,27 @@ def bert_classify(args, label_index, training_rate, label_rate, frozen_bert=Fals
     classifier = fetch_classifier(method, model_classifier_cfg, input=model_bert_cfg.hidden, output=label_num)
     model = BERTClassifier(model_bert_cfg, classifier=classifier, frozen_bert=frozen_bert)
     optimizer = torch.optim.Adam(params=model.parameters(), lr=train_cfg.lr)
-    trainer_train = train.Trainer(train_cfg, model, data_loader_train, optimizer, args.save_dir, get_device(args.gpu)
-                                  , save_name=args.save_model)
+    trainer = train.Trainer(train_cfg, model, optimizer, args.save_path, get_device(args.gpu))
 
-    def get_loss(model, batch):
-        inputs, labels = batch
-
+    def func_loss(model, batch):
+        inputs, label = batch
         logits = model(inputs, True)
-        loss = criterion(logits, labels)
+        loss = criterion(logits, label)
         return loss
 
-    trainer_train.train_eval(get_loss, stat_acc_f1, data_loader_test, data_loader_vali, model_file=args.pretrain_model, load_self=True)
+    def func_forward(model, batch):
+        inputs, label = batch
+        logits = model(inputs, False)
+        return logits, label
+
+    def func_evaluate(label, predicts):
+        stat = stat_acc_f1(label.cpu().numpy(), predicts.cpu().numpy())
+        return stat
+
+    trainer.train(func_loss, func_forward, func_evaluate, data_loader_train, data_loader_test, data_loader_vali
+                        , model_file=args.pretrain_model, load_self=True)
+    label_estimate_test = trainer.run(func_forward, None, data_loader_test)
+    return label_test, label_estimate_test
 
 
 if __name__ == "__main__":
@@ -68,5 +75,7 @@ if __name__ == "__main__":
     args = handle_argv('bert_classifier_' + method, 'bert_classifier_train.json', method)
     if args.label_index != -1:
         label_index = args.label_index
-    bert_classify(args, label_index, train_rate, label_rate, frozen_bert=frozen_bert, balance=balance)
+    label_test, label_estimate_test = bert_classify(args, label_index, train_rate, label_rate
+                                                    , frozen_bert=frozen_bert, balance=balance)
+
 

@@ -147,52 +147,21 @@ def shuffle_data_label(data, label):
     return data[index, ...], label[index, ...]
 
 
-def separate_by_user(data, labels, target_label_index, label_user_index, training_rate, seed=None):
-    user_num = np.unique(labels[..., label_user_index]).size
-    arr = np.arange(user_num)
-    np.random.shuffle(arr)
-    selected_user = arr[:int(user_num * training_rate)]
-    selected_index = np.in1d(labels[:, label_user_index], selected_user)
-    return data[selected_index, ...], labels[selected_index, target_label_index]
-
-
 def prepare_pretrain_dataset(data, labels, training_rate, seed=None):
     set_seeds(seed)
-    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_embedding_dataset(data, labels, label_index=0
-                                                                               , training_rate=training_rate, vali_rate=0.1
-                                                                               , change_shape=False)
+    data_train, label_train, data_vali, label_vali, data_test, label_test = partition_and_reshape(data, labels, label_index=0
+                                                                                                  , training_rate=training_rate, vali_rate=0.1
+                                                                                                  , change_shape=False)
     return data_train, label_train, data_vali, label_vali
 
 
-def prepare_classifier_dataset(data, labels, label_index=0, training_rate=0.8, change_shape=True
-                              , merge=0, merge_mode='all', seed=None):
-    set_seeds(seed)
-    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_embedding_dataset(data, labels,
-                                                                                                      label_index=label_index
-                                                                                                      ,training_rate=training_rate,
-                                                                                                      vali_rate=0.1
-                                                                                                      , change_shape=change_shape
-                                                                                                      , merge=merge,
-                                                                                                      merge_mode=merge_mode)
-    return data_train, label_train, data_vali, label_vali, data_test, label_test
-
-
-def prepare_dataset(data, labels, label_index=0, training_rate=0.8, label_rate=1.0, change_shape=True
-                              , merge=0, merge_mode='all', seed=None, balance=False, user_index=None, user_rate=0.8):
+def prepare_classifier_dataset(data, labels, label_index=0, training_rate=0.8, label_rate=1.0, change_shape=True
+                               , merge=0, merge_mode='all', seed=None, balance=False):
 
     set_seeds(seed)
-    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_embedding_dataset(data, labels, label_index=label_index
-                                                                               , training_rate=training_rate, vali_rate=0.1
-                                                                               , change_shape=change_shape
-                                                                               , merge=merge, merge_mode=merge_mode)
-    if user_index:
-        set_seeds(seed)
-        _, label_train_user, _, _, _, _ = prepare_embedding_dataset(data, labels, label_index=user_index, training_rate=training_rate,
-                                                           vali_rate=0.1, change_shape=change_shape, merge=merge, merge_mode=merge_mode)
-        label_com = np.array([label_train, label_train_user]).transpose([1, 0])
-        set_seeds(seed)
-        data_train, label_train = separate_by_user(data_train, label_com, 0, 1, user_rate)
-        label_rate *= label_com.shape[0] / label_train.shape[0]
+    data_train, label_train, data_vali, label_vali, data_test, label_test \
+        = partition_and_reshape(data, labels, label_index=label_index, training_rate=training_rate, vali_rate=0.1
+                                , change_shape=change_shape, merge=merge, merge_mode=merge_mode)
     set_seeds(seed)
     if balance:
         data_train_label, label_train_label, _, _ \
@@ -203,8 +172,8 @@ def prepare_dataset(data, labels, label_index=0, training_rate=0.8, label_rate=1
     return data_train_label, label_train_label, data_vali, label_vali, data_test, label_test
 
 
-def prepare_embedding_dataset(data, labels, label_index=0, training_rate=0.8, vali_rate=0.1, change_shape=True
-                              , merge=0, merge_mode='all', shuffle=True):
+def partition_and_reshape(data, labels, label_index=0, training_rate=0.8, vali_rate=0.1, change_shape=True
+                          , merge=0, merge_mode='all', shuffle=True):
     arr = np.arange(data.shape[0])
     if shuffle:
         np.random.shuffle(arr)
@@ -232,42 +201,6 @@ def prepare_embedding_dataset(data, labels, label_index=0, training_rate=0.8, va
         data_vali, label_vali = merge_dataset(data_vali, label_vali, mode=merge_mode)
     print('Train Size: %d, Vali Size: %d, Test Size: %d' % (label_train.shape[0], label_vali.shape[0], label_test.shape[0]))
     return data_train, label_train, data_vali, label_vali, data_test, label_test
-
-
-def prepare_embedding_dataset_balance(data, labels, label_index=0, training_rate=0.8, change_shape=True,
-                                      merge_mode='all', merge=0):
-    from scipy import stats
-    labels_unique = np.unique(labels[..., label_index])
-    t = np.min(labels[..., label_index])
-    label_num = []
-    for i in range(labels_unique.size):
-        label_num.append(np.sum(stats.mode(labels[..., label_index], 1)[0] == labels_unique[i]))
-    train_num = min(min(label_num), int(data.shape[0] * training_rate / len(label_num)))
-    if train_num == min(label_num):
-        print("Warning! You are using all of label %d." % label_num.index(train_num))
-    index = np.zeros(data.shape[0], dtype=bool)
-    for i in range(labels_unique.size):
-        modes = stats.mode(labels[..., label_index], 1)[0]
-        class_index = np.argwhere(modes.reshape(modes.size) == labels_unique[i])
-        class_index = class_index.reshape(class_index.size)
-        np.random.shuffle(class_index)
-        temp = class_index[:train_num]
-        index[temp] = True
-    data_train = data[index, ...]
-    data_test = data[~index, ...]
-    label_train = labels[index, ..., label_index] - t
-    label_test = labels[~index, ..., label_index] - t
-    if change_shape:
-        data_train = reshape_data(data_train, merge)
-        data_test = reshape_data(data_test, merge)
-        label_train = reshape_label(label_train, merge)
-        label_test = reshape_label(label_test, merge)
-    if change_shape and merge != 0:
-        data_train, label_train = merge_dataset(data_train, label_train, mode=merge_mode)
-        data_test, label_test = merge_dataset(data_test, label_test, mode=merge_mode)
-    print('Train Size: %d, Test Size: %d; Real Rate: %0.3f' % (label_train.shape[0], label_test.shape[0]
-                                                               , label_train.shape[0] * 1.0 / (label_train.shape[0] + label_test.shape[0])))
-    return data_train, label_train, data_test, label_test
 
 
 def prepare_simple_dataset(data, labels, training_rate=0.2):

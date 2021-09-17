@@ -114,49 +114,6 @@ def plot_reconstruct_sensor(sensors, sensors_re, sensor_dimen=3):
     plt.show()
 
 
-def plot_nlp_training_method():
-    m_sensor_wp = np.array([[95.3, 90.0, 88.7], [95.5, 90.0, 88.2]])
-    m_sensor_p = np.array([[95.2, 82.6, 83.6], [95.4, 82.5, 83.1]])
-    m_all_wp = np.array([[95.0, 84.6, 84.5], [95.2, 84.4, 84.0]])
-    m_all_p = np.array([[95.1, 82.8, 82.1], [94.8, 82.6, 81.4]])
-    data = np.array([m_sensor_wp, m_sensor_p, m_all_wp, m_all_p])
-    index = 1
-    labels = ['HAR', 'DPC', 'UI']
-    labels_data = ['P-WP', 'P-P', 'A-WP', 'A-P']
-    men_means = [20, 34, 30, 35, 27]
-    women_means = [25, 32, 34, 20, 25]
-
-    x = np.arange(len(labels))  # the label locations
-    width = 0.2  # the width of the bars
-
-    fig, ax = plt.subplots()
-    for i in range(len(labels)):
-        for j in range(len(labels_data)):
-            xp = x[i] + (j - np.mean(x)) * width
-            if i == 0:
-                ax.bar(xp, data[j, index, i], width, label=labels_data[j], color=COLOR_LIST[j])
-            else:
-                ax.bar(xp, data[j, index, i], width, color=COLOR_LIST[j])
-    # rects1 = ax.bar(x - width / 2, men_means, width, label='Men')
-    # rects2 = ax.bar(x + width / 2, women_means, width, label='Women')
-
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylim([80, 100])
-    ax.set_ylabel('Scores', fontsize=14, fontweight='bold')
-    ax.set_title('F1-score', fontsize=18, fontweight='bold')
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels, fontsize=14, fontweight='bold')
-    # ax.tick_params(axis='y', which='minor', labelsize=20)
-    ax.legend()
-
-    # ax.bar_label(rects1, padding=3)
-    # ax.bar_label(rects2, padding=3)
-
-    fig.tight_layout()
-
-    plt.show()
-
-
 def plot_roc_auc(y_pred, y_true):
     auc = metrics.roc_auc_score(y_true, y_pred)
     print('ROC AUC=%.3f' % (auc))
@@ -170,5 +127,4 @@ def plot_roc_auc(y_pred, y_true):
 
 
 
-if __name__ == "__main__":
-    plot_nlp_training_method()
+# if __name__ == "__main__":

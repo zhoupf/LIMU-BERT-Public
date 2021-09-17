@@ -117,50 +117,6 @@ class MultiHeadedSelfAttention(nn.Module):
         return h
 
 
-class MultiHeadedCrossAttention(nn.Module):
-    """ Multi-Headed Dot Product Attention """
-    def __init__(self, cfg, cross_num):
-        super().__init__()
-        for i in range(cross_num):
-            self.__setattr__('proj' + str(i), MultiProjection(cfg))
-        # self.drop = nn.Dropout(cfg.p_drop_attn)
-        self.scores = None # for visualization
-        self.n_heads = cfg.n_heads
-        self.cross_num = cross_num
-        self.atten_weights = nn.Parameter(torch.randn(cross_num, cross_num), requires_grad=True)
-
-    def multi_attention(self, q, k, v):
-        q, k, v = (split_last(x, (self.n_heads, -1)).transpose(1, 2)
-                   for x in [q, k, v])
-        # (B, H, S, W) @ (B, H, W, S) -> (B, H, S, S) -softmax-> (B, H, S, S)
-        scores = q @ k.transpose(-2, -1) / np.sqrt(k.size(-1))
-        # scores = self.drop(F.softmax(scores, dim=-1))
-        scores = F.softmax(scores, dim=-1)
-        # (B, H, S, S) @ (B, H, S, W) -> (B, H, S, W) -trans-> (B, S, H, W)
-        h = (scores @ v).transpose(1, 2).contiguous()
-        # -merge-> (B, S, D)
-        h = merge_last(h, 2)
-        return h
-
-    def forward(self, xs):
-        # (B, S, D) -proj-> (B, S, D) -split-> (B, S, H, W) -trans-> (B, H, S, W)
-        qs, ks, vs = [], [], []
-        for i, x in enumerate(xs):
-            proj = self.__getattr__('proj' + str(i))
-            q, k, v = proj(x)
-            qs.append(q)
-            ks.append(k)
-            vs.append(v)
-        h = []
-        for i in range(self.cross_num):
-            temp = self.atten_weights[i, i] * self.multi_attention(qs[i], ks[i], vs[i])
-            for j in range(self.cross_num):
-                if i != j:
-                    temp += self.atten_weights[i, j] * self.multi_attention(qs[i], ks[j], vs[j])
-            h.append(temp)
-        return h
-
-
 class PositionWiseFeedForward(nn.Module):
     """ FeedForward Neural Networks for each position """
     def __init__(self, cfg):

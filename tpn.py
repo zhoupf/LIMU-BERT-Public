@@ -15,8 +15,8 @@ import train
 from config import load_dataset_label_names
 from models import fetch_classifier, BenchmarkTPNPretrain, BenchmarkTPNClassifier
 from statistic import stat_acc_f1, stat_acc_f1_tpn
-from utils import load_classifier_data_config, prepare_embedding_dataset, prepare_embedding_dataset_balance, get_device, \
-    IMUDataset, handle_argv, shuffle_data_label, prepare_dataset
+from utils import load_classifier_data_config, get_device, \
+    IMUDataset, handle_argv, shuffle_data_label, prepare_classifier_dataset
 
 
 def noised(data):
@@ -67,9 +67,9 @@ def generate_self_trained_dataset(dataset, funcs=None):
 def self_train(args, training_rate, balance, task_num=5):
     data, labels, train_cfg, model_cfg, dataset_cfg = load_classifier_data_config(args)
     # label_names, label_num = load_dataset_label_names(dataset_cfg, label_index)
-    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_dataset(data, labels
-                , label_index=label_index, training_rate=training_rate, label_rate=label_rate,
-                merge=model_cfg.seq_len, change_shape=True, seed=train_cfg.seed, balance=balance)
+    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_classifier_dataset(data, labels
+                                                                                                       , label_index=label_index, training_rate=training_rate, label_rate=label_rate,
+                                                                                                       merge=model_cfg.seq_len, change_shape=True, seed=train_cfg.seed, balance=balance)
 
     dataset_train_new, label_train_new = generate_self_trained_dataset(data_train)
     dataset_vali_new, label_vali_new = generate_self_trained_dataset(data_vali)
@@ -106,9 +106,9 @@ def classify(args, label_index, training_rate, label_rate, balance):
     data, labels, train_cfg, model_cfg, dataset_cfg = load_classifier_data_config(args)
     label_names, label_num = load_dataset_label_names(dataset_cfg, label_index)
 
-    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_dataset(data, labels
-        , label_index=label_index, training_rate=training_rate, label_rate=label_rate
-        , merge=model_cfg.seq_len, seed=train_cfg.seed, balance=balance)
+    data_train, label_train, data_vali, label_vali, data_test, label_test = prepare_classifier_dataset(data, labels
+                                                                                                       , label_index=label_index, training_rate=training_rate, label_rate=label_rate
+                                                                                                       , merge=model_cfg.seq_len, seed=train_cfg.seed, balance=balance)
     data_set_train = IMUDataset(data_train, label_train)
     data_set_test = IMUDataset(data_test, label_test)
     data_set_vali = IMUDataset(data_vali, label_vali)
