@@ -15,8 +15,9 @@ from torch.utils.data import DataLoader
 import train
 from config import load_dataset_label_names
 from models import fetch_classifier
-from statistic import stat_acc_f1
-from utils import get_device, merge_dataset, match_labels, handle_argv, IMUDataset, load_classifier_data_config, \
+from plot import plot_matrix
+from statistic import stat_acc_f1, stat_results
+from utils import get_device, handle_argv, IMUDataset, load_classifier_data_config, \
     FFTDataset, prepare_classifier_dataset, Preprocess4Normalization
 
 
@@ -46,14 +47,24 @@ def classify_benchmark(args, label_index, training_rate, label_rate, balance=Tru
     optimizer = torch.optim.Adam(params=model.parameters(), lr=train_cfg.lr)  # , weight_decay=0.95
     trainer = train.Trainer(train_cfg, model, optimizer, args.save_path, get_device(args.gpu))
 
-    def get_loss(model, batch):
-        inputs, labels = batch
-
+    def func_loss(model, batch):
+        inputs, label = batch
         logits = model(inputs, True)
-        loss = criterion(logits, labels)
+        loss = criterion(logits, label)
         return loss
 
-    trainer.train(get_loss, stat_acc_f1, data_loader_test, data_loader_vali)
+    def func_forward(model, batch):
+        inputs, label = batch
+        logits = model(inputs, False)
+        return logits, label
+
+    def func_evaluate(label, predicts):
+        stat = stat_acc_f1(label.cpu().numpy(), predicts.cpu().numpy())
+        return stat
+
+    trainer.train(func_loss, func_forward, func_evaluate, data_loader_train, data_loader_test, data_loader_vali)
+    label_estimate_test = trainer.run(func_forward, None, data_loader_test)
+    return label_test, label_estimate_test
 
 
 if __name__ == "__main__":
@@ -61,6 +72,11 @@ if __name__ == "__main__":
     balance = True
     label_rate = 0.01
     method = "gru"
-    args = handle_argv('bench_' + method, 'train.json', method)
-    classify_benchmark(args, 0, train_rate, label_rate, balance=balance, method=method)
+    label_index = 0
 
+    args = handle_argv('bench_' + method, 'train.json', method)
+    label_test, label_estimate_test = classify_benchmark(args, label_index, train_rate, label_rate, balance=balance, method=method)
+
+    label_names, label_num = load_dataset_label_names(args.dataset_cfg, label_index)
+    acc, matrix, f1 = stat_results(label_test, label_estimate_test)
+    matrix_norm = plot_matrix(matrix, label_names)
