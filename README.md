@@ -1,5 +1,11 @@
 # LIMU-BERT
-Adopt lite BERT to analyze IMU data
+LIMU-BERT, a novel representation learning model that can make use of unlabeled IMU data and extract generalized rather than task-specific features. 
+LIMU-BERT adopts the principle of self-supervised training of the natural language model BERT to effectively capture temporal relations and feature distributions in IMU sensor data. 
+However, the original BERT is not adaptive to mobile IMU data. 
+By meticulously observing the characteristics of IMU sensors, we propose a series of techniques and accordingly adapt LIMU-BERT to IMU sensing tasks. The designed models are lightweight and easily deployable on mobile devices. 
+With the representations learned via LIMU-BERT, task-specific models trained with limited labeled samples can achieve superior performances. 
+
+Please check our paper for more details.
 
 ## Pretrain Script Usage
 usage: pretrain_base.py [-h] [-g GPU] [-f MODEL_FILE] [-t TRAIN_CFG] [-m MODEL_CFG] [-a MASK_CFG] {eleme,hhar,huawei,motion,uci,wisdm} {10_100,20_120}
@@ -25,7 +31,7 @@ optional arguments:
 
   -a MASK_CFG, --mask_cfg MASK_CFG      Mask strategy json file path
 
-## Docker
-check containers: docker ps -a
-check running containers: docker ps -s
+## Cite
+LIMU-BERT: Unleashing the Potential of Unlabeled Data for IMU Sensing Applications
+
 

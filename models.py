@@ -1,19 +1,14 @@
 """
-    Copyright 2019 Tae Hwan Jung
-    ALBERT Implementation with forking
-    Clean Pytorch Code from https://github.com/dhlee347/pytorchic-bert
+    In this script, the implementation of BERT refers from https://github.com/dhlee347/pytorchic-bert
 """
-from torch.nn.modules.loss import _Loss
 
 from utils import split_last, merge_last
-
 
 import math
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 
 
 def gelu(x):
@@ -38,7 +33,7 @@ class LayerNorm(nn.Module):
 
 
 class Embeddings(nn.Module):
-    "The embedding module from word, position and token_type embeddings."
+
     def __init__(self, cfg, pos_embed=None):
         super().__init__()
         # Original BERT Embedding
@@ -159,7 +154,7 @@ class Transformer(nn.Module):
 
 
 class LIMUBertModel4Pretrain(nn.Module):
-    "Bert Model for Pretrain : Masked LM and next sentence classification"
+
     def __init__(self, cfg, output_embed=False):
         super().__init__()
         self.transformer = Transformer(cfg)
@@ -185,13 +180,13 @@ class LIMUBertModel4Pretrain(nn.Module):
 
 
 class LIMUBert4Embedding(nn.Module):
-    "Bert Model for Pretrain : Masked LM and next sentence classification"
+
     def __init__(self, cfg, output_embed=False):
         super().__init__()
         self.transformer = Transformer(cfg)
         self.fc = nn.Linear(cfg.hidden, cfg.hidden)
         self.linear = nn.Linear(cfg.hidden, cfg.hidden)
-        self.activ1 = gelu
+        self.activ = gelu
         self.norm = LayerNorm(cfg)
         self.decoder1 = nn.Linear(cfg.hidden, cfg.feature_num)
         self.output_embed = output_embed
@@ -204,7 +199,7 @@ class LIMUBert4Embedding(nn.Module):
         state_dict = self.state_dict()
         model_dicts = torch.load(model_file, map_location=map_location).items()
         for k, v in model_dicts:
-            if k in state_dict and k in state_dict:
+            if k in state_dict:
                 state_dict.update({k: v})
         self.load_state_dict(state_dict)
 
@@ -418,69 +413,6 @@ class ClassifierCNN1D(nn.Module):
         return h
 
 
-class ClassifierCNN1D_GRU(nn.Module):
-    def __init__(self, cfg, output=None):
-        super().__init__()
-        for i in range(cfg.num_cnn):
-            if i == 0:
-                self.__setattr__('cnn' + str(i),
-                                 nn.Conv1d(1, cfg.conv_io[i][1], cfg.conv_io[i][2], padding=cfg.conv_io[i][3]))
-            else:
-                self.__setattr__('cnn' + str(i),
-                                 nn.Conv1d(cfg.conv_io[i][0], cfg.conv_io[i][1], cfg.conv_io[i][2], padding=cfg.conv_io[i][3]))
-            # self.__setattr__('bn' + str(i), nn.BatchNorm1d(cfg.conv_io[i][1]))
-        self.pool = nn.MaxPool1d(cfg.pool[0], stride=cfg.pool[1], padding=cfg.pool[2])
-        for i in range(cfg.num_rnn):
-            if i != 0:
-                self.__setattr__('gru' + str(i),
-                                 nn.GRU(cfg.rnn_io[i][0], cfg.rnn_io[i][1], num_layers=cfg.num_layers[i], batch_first=True))
-            else:
-                self.__setattr__('gru' + str(i),
-                                 nn.GRU(cfg.flat_num, cfg.rnn_io[i][1], num_layers=cfg.num_layers[i],
-                                        batch_first=True))
-        self.flatten = nn.Flatten()
-        for i in range(cfg.num_linear):
-            if i == 0:
-                self.__setattr__('lin' + str(i), nn.Linear(cfg.flat_num * cfg.seq_len, cfg.linear_io[i][1])) #nn.Linear(cfg.rnn_io[-1][1]
-            elif output is not None and i == cfg.num_linear - 1:
-                self.__setattr__('lin' + str(i), nn.Linear(cfg.linear_io[i][0], output))
-            else:
-                self.__setattr__('lin' + str(i), nn.Linear(cfg.linear_io[i][0], cfg.linear_io[i][1]))
-        self.activ = cfg.activ
-        self.dropout = cfg.dropout
-        self.num_cnn = cfg.num_cnn
-        self.num_linear = cfg.num_linear
-        self.num_rnn = cfg.num_rnn
-
-    def forward(self, input_seqs, training=False):
-        h = input_seqs.view(input_seqs.size(0) * input_seqs.size(1), input_seqs.size(2)).unsqueeze(1)
-        for i in range(self.num_cnn):
-            cnn = self.__getattr__('cnn' + str(i))
-            h = cnn(h)
-            if self.activ:
-                h = F.relu(h)
-            h = self.pool(h)
-            # h = bn(h)
-            # h = self.pool(h)
-        h = self.flatten(h)
-        h = h.view(input_seqs.size(0), input_seqs.size(1), -1)
-        h = self.flatten(h)
-        # for i in range(self.num_rnn):
-        #     rnn = self.__getattr__('gru' + str(i))
-        #     h, _ = rnn(h)
-        #     # if self.activ:
-        #     #     h = F.relu(h)
-        # h = h[:, -1, :]
-        if self.dropout:
-            h = F.dropout(h, training=training)
-        for i in range(self.num_linear):
-            linear = self.__getattr__('lin' + str(i))
-            h = linear(h)
-            if self.activ:
-                h = F.relu(h)
-        return h
-
-
 class BERTClassifier(nn.Module):
 
     def __init__(self, bert_cfg, classifier=None, frozen_bert=False):
@@ -500,7 +432,7 @@ class BERTClassifier(nn.Module):
         state_dict = self.state_dict()
         model_dicts = torch.load(model_file, map_location=map_location).items()
         for k, v in model_dicts:
-            if k in state_dict and k in state_dict:
+            if k in state_dict:
                 state_dict.update({k: v})
         self.load_state_dict(state_dict)
 
@@ -661,7 +593,7 @@ class BenchmarkTPNClassifier(nn.Module):
         state_dict = self.state_dict()
         model_dicts = torch.load(model_file, map_location=map_location).items()
         for k, v in model_dicts:
-            if k in state_dict and k in state_dict:
+            if k in state_dict:
                 state_dict.update({k: v})
         self.load_state_dict(state_dict)
 
@@ -669,8 +601,6 @@ class BenchmarkTPNClassifier(nn.Module):
 def fetch_classifier(method, model_cfg, input=None, output=None, feats=False):
     if 'lstm' in method:
         model = ClassifierLSTM(model_cfg, input=input, output=output)
-    elif 'cnn_gru' in method:
-        model = ClassifierCNN1D_GRU(model_cfg, output=output)
     elif 'gru' in method:
         model = ClassifierGRU(model_cfg, input=input, output=output)
     elif 'dcnn' in method:

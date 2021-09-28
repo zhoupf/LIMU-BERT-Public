@@ -5,7 +5,6 @@
 # @Email   : 735820057@qq.com
 # @File    : benchmark.py
 # @Description :
-import argparse
 
 import numpy as np
 import torch
