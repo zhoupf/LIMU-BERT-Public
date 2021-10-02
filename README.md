@@ -6,8 +6,16 @@ By meticulously observing the characteristics of IMU sensors, we propose a serie
 With the representations learned via LIMU-BERT, task-specific models trained with limited labeled samples can achieve superior performances. 
 
 Please check our paper for more details.
-
-## Pretrain Script Usage
+## File Overview
+This contains 9 python files.
+- [`tokenization.py`](./tokenization.py) : Tokenizers adopted from the original Google BERT's code
+- [`models.py`](./models.py) : Model classes for a general transformer
+- [`optim.py`](./optim.py) : A custom optimizer (BertAdam class) adopted from Hugging Face's code
+- [`train.py`](./train.py) : A helper class for training and evaluation
+- [`utils.py`](./utils.py) : Several utility functions
+- [`pretrain.py`](./pretrain.py) : An example code for pre-training transformer
+- 
+## Usage
 usage: pretrain_base.py [-h] [-g GPU] [-f MODEL_FILE] [-t TRAIN_CFG] [-m MODEL_CFG] [-a MASK_CFG] {eleme,hhar,huawei,motion,uci,wisdm} {10_100,20_120}
 
 PyTorch LIMU-BERT Model
