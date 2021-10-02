@@ -1,9 +1,6 @@
 # LIMU-BERT
 LIMU-BERT, a novel representation learning model that can make use of unlabeled IMU data and extract generalized rather than task-specific features. 
-LIMU-BERT adopts the principle of self-supervised training of the natural language model BERT to effectively capture temporal relations and feature distributions in IMU sensor data. 
-However, the original BERT is not adaptive to mobile IMU data. 
-By meticulously observing the characteristics of IMU sensors, we propose a series of techniques and accordingly adapt LIMU-BERT to IMU sensing tasks. The designed models are lightweight and easily deployable on mobile devices. 
-With the representations learned via LIMU-BERT, task-specific models trained with limited labeled samples can achieve superior performances. 
+LIMU-BERT adopts the principle of self-supervised training of the natural language model BERT to effectively capture temporal relations and feature distributions in IMU sensor data. With the representations learned via LIMU-BERT, task-specific models trained with limited labeled samples can achieve superior performances. The designed models are lightweight and easily deployable on mobile devices. 
 
 Please check our paper for more details.
 ## File Overview
