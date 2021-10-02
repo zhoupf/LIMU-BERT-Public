@@ -14,7 +14,16 @@ This contains 9 python files.
 - [`train.py`](./train.py) : A helper class for training and evaluation
 - [`utils.py`](./utils.py) : Several utility functions
 - [`pretrain.py`](./pretrain.py) : An example code for pre-training transformer
-- 
+
+
+project_root/
+│
+├── project/  # Project source code
+├── docs/
+├── README
+├── HOW_TO_CONTRIBUTE
+├── CODE_OF_CONDUCT
+├── examples.py
 ## Usage
 usage: pretrain_base.py [-h] [-g GPU] [-f MODEL_FILE] [-t TRAIN_CFG] [-m MODEL_CFG] [-a MASK_CFG] {eleme,hhar,huawei,motion,uci,wisdm} {10_100,20_120}
 
