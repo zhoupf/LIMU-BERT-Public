@@ -8,22 +8,22 @@ With the representations learned via LIMU-BERT, task-specific models trained wit
 Please check our paper for more details.
 ## File Overview
 This contains 9 python files.
-- [`tokenization.py`](./tokenization.py) : Tokenizers adopted from the original Google BERT's code
-- [`models.py`](./models.py) : Model classes for a general transformer
-- [`optim.py`](./optim.py) : A custom optimizer (BertAdam class) adopted from Hugging Face's code
-- [`train.py`](./train.py) : A helper class for training and evaluation
-- [`utils.py`](./utils.py) : Several utility functions
-- [`pretrain.py`](./pretrain.py) : An example code for pre-training transformer
+- [`config`](./config) : config json files of models and training hyper-parameters.
+- [`dataset`](./dataset) : the scripts for preprocessing four open datasets and a config file of key attributes of those datasets.
+- [`benchmark.py`](./benchmark.py) : run DCNN, DeepSense, and R-GRU.
+- [`classifier.py`](./tokenization.py) : run LIMU-GRU that inputs representations learned by LIMU-BERT and output labels for target applications.
+- [`classifier_bert.py`](./models.py) : run LIMU-GRU that inputs raw IMU readings and output labels for target applications.
+- [`config.py`](./optim.py) : some helper functions for loading settings.
+- [`embedding.py`](./embedding.py) : generates representation or embeddings for raw IMU readings given a pre-trained LIMU-BERT.
+- [`models.py`](./models.py) : the implementations of LIMU-BERT, LIMU-GRU, and other baseline models.
+- [`plot.py`](./plot.py) : some helper function for plotting IMU sensor data or learned representations.
+- [`pretrain.py`](./pretrain.py) : pretrain LIMU-BERT.
+- [`statistic.py`](./statistic.py) : some helper functions for evaluation.
+- [`tpn.py`](./tpn.py) : run TPN.
+- [`train.py`](./train.py) : several helper functions for training models.
+- [`utils.py`](./utils.py) : some helper functions for preprocessing data or separating dataset.
 
 
-project_root/
-│
-├── project/  # Project source code
-├── docs/
-├── README
-├── HOW_TO_CONTRIBUTE
-├── CODE_OF_CONDUCT
-├── examples.py
 ## Usage
 usage: pretrain_base.py [-h] [-g GPU] [-f MODEL_FILE] [-t TRAIN_CFG] [-m MODEL_CFG] [-a MASK_CFG] {eleme,hhar,huawei,motion,uci,wisdm} {10_100,20_120}
 
