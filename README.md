@@ -9,11 +9,12 @@ Please check our paper for more details.
 ## File Overview
 This contains 9 python files.
 - [`config`](./config) : config json files of models and training hyper-parameters.
-- [`dataset`](./dataset) : the scripts for preprocessing four open datasets and a config file of key attributes of those datasets.
+- [`dataset`](./dataset) : the scripts for preprocessing four open datasets.
+- - [`data_config`](./dataset/data_config.json) : config file of key attributes of those datasets.
 - [`benchmark.py`](./benchmark.py) : run DCNN, DeepSense, and R-GRU.
-- [`classifier.py`](./tokenization.py) : run LIMU-GRU that inputs representations learned by LIMU-BERT and output labels for target applications.
-- [`classifier_bert.py`](./models.py) : run LIMU-GRU that inputs raw IMU readings and output labels for target applications.
-- [`config.py`](./optim.py) : some helper functions for loading settings.
+- [`classifier.py`](./classifier.py) : run LIMU-GRU that inputs representations learned by LIMU-BERT and output labels for target applications.
+- [`classifier_bert.py`](./classifier_bert.py) : run LIMU-GRU that inputs raw IMU readings and output labels for target applications.
+- [`config.py`](./config.py) : some helper functions for loading settings.
 - [`embedding.py`](./embedding.py) : generates representation or embeddings for raw IMU readings given a pre-trained LIMU-BERT.
 - [`models.py`](./models.py) : the implementations of LIMU-BERT, LIMU-GRU, and other baseline models.
 - [`plot.py`](./plot.py) : some helper function for plotting IMU sensor data or learned representations.
