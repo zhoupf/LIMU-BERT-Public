@@ -28,11 +28,11 @@ In the [`dataset`](./dataset) folder, we provide four scripts that preprocess th
 - [HHAR](http://archive.ics.uci.edu/ml/datasets/heterogeneity+activity+recognition)
 - [UCI](http://archive.ics.uci.edu/ml/datasets/Smartphone-Based+Recognition+of+Human+Activities+and+Postural+Transitions)
 - [MotionSense](https://github.com/mmalekzadeh/motion-sense)
-- [Shoaib](https://www.mdpi.com/1424-8220/14/6/10146)
+- [Shoaib](https://www.utwente.nl/en/eemcs/ps/research/dataset/)
 
 Each script has a kernel function which transform the raw IMU data and output preprocessed data and label. You can set the sampling rate and window size (sequence length).
-- Data: a numpy array with the shape of (N*W*F), N is the number of samples, W is the windows size, and F is the number of features (6 or 9).
-- Label: a numpy array with the shape of (N*W*L), N is the number of samples, W is the windows size, and L is the number of label types (e.g., activity and user label). The detailed label information is provied in [`data_config.json`](./dataset/data_config.json).
+- Data: a numpy array with the shape of (N\*W\*F), N is the number of samples, W is the windows size, and F is the number of features (6 or 9).
+- Label: a numpy array with the shape of (N\*W*\L), N is the number of samples, W is the windows size, and L is the number of label types (e.g., activity and user label). The detailed label information is provied in [`data_config.json`](./dataset/data_config.json).
 The two numpy arrays are saved as "data_X_Y.npy" and "label_X_Y.npy", where X represents the sampling rate and Y is the window size. For example, all data and label are saved as 
 "data_20_120.npy" and "label_20_120.npy" in our experiments.
 ## Usage
