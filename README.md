@@ -23,6 +23,14 @@ This contains 9 python files.
 - [`train.py`](./train.py) : several helper functions for training models.
 - [`utils.py`](./utils.py) : some helper functions for preprocessing data or separating dataset.
 
+## Setup
+This repository has be tested for Python 3.8.5 and Pytorch 1.5.1 and 1.7.1. To install all dependencies, use the following command:
+
+```
+$ pip install -r requirements.txt
+```
+
+
 ## Prepare dataset
 In the [`dataset`](./dataset) folder, we provide four scripts that preprocess the corresponding datasets. Those datasets are widely adopted in the previous studies:
 - [HHAR](http://archive.ics.uci.edu/ml/datasets/heterogeneity+activity+recognition)
