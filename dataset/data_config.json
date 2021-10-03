@@ -34,7 +34,7 @@
         "activity_label_index": 0,
         "activity_label_size": 6,
         "activity_label": [
-            "standing", "sitting", "lying", "walking", "downstairs", "upstairs"
+            "walking", "upstairs", "downstairs", "sitting", "standing", "lying"
         ],
         "user_label_index": 1,
         "user_label_size": 30,
