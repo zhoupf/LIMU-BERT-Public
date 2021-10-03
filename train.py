@@ -8,8 +8,6 @@
 
 import os
 import time
-import json
-from typing import NamedTuple
 
 import numpy as np
 import torch

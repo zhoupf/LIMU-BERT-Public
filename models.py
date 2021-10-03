@@ -1,6 +1,10 @@
-"""
-    In this script, the implementation of BERT refers from https://github.com/dhlee347/pytorchic-bert
-"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2020/10/4 9:16
+# @Author  : Huatao
+# @Email   : 735820057@qq.com
+# @File    : benchmark.py
+# @Description : In this script, the implementation of BERT refers from https://github.com/dhlee347/pytorchic-bert
 
 from utils import split_last, merge_last
 

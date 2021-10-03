@@ -1,25 +1,25 @@
-"""
-    Copyright 2019 Tae Hwan Jung
-    ALBERT Implementation with forking
-    Clean Pytorch Code from https://github.com/dhlee347/pytorchic-bert
-"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2020/9/16 11:22
+# @Author  : Huatao
+# @Email   : 735820057@qq.com
+# @File    : utils.py
+# @Description :
+
 import argparse
 
 from scipy.special import factorial
 from torch.utils.data import Dataset
 
-from config import create_io_config, load_dataset_stats, TrainConfig, PretrainModelConfig, MaskConfig, load_model_config
-from plot import plot_matrix
+from config import create_io_config, load_dataset_stats, TrainConfig, MaskConfig, load_model_config
+
 
 """ Utils Functions """
 
-import os
 import random
-import logging
 
 import numpy as np
 import torch
-import copy
 import sys
 
 
@@ -28,7 +28,6 @@ def set_seeds(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
 
 
 def get_device(gpu):
@@ -56,27 +55,6 @@ def merge_last(x, n_dims):
     s = x.size()
     assert n_dims > 1 and n_dims < len(s)
     return x.view(*s[:-n_dims], -1)
-
-
-def get_logger(name, log_path):
-    "get logger"
-    logger = logging.getLogger(name)
-    fomatter = logging.Formatter(
-        '[ %(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
-
-    if not os.path.isfile(log_path):
-        f = open(log_path, "w+")
-
-    fileHandler = logging.FileHandler(log_path)
-    fileHandler.setFormatter(fomatter)
-    logger.addHandler(fileHandler)
-
-    #streamHandler = logging.StreamHandler()
-    #streamHandler.setFormatter(fomatter)
-    #logger.addHandler(streamHandler)
-
-    logger.setLevel(logging.DEBUG)
-    return logger
 
 
 def bert_mask(seq_len, goal_num_predict):
@@ -520,21 +498,6 @@ def load_bert_classifier_data_config(args):
     data = np.load(args.data_path).astype(np.float32)
     labels = np.load(args.label_path).astype(np.float32)
     return data, labels, train_cfg, model_bert_cfg, model_classifier_cfg, dataset_cfg
-
-
-def load_missing_data_config(args):
-    model_bert_cfg, model_classifier_cfg = args.model_cfg
-    train_cfg = TrainConfig.from_json(args.train_cfg)
-    dataset_cfg = args.dataset_cfg
-    mask_cfg = MaskConfig.from_json(args.mask_cfg)
-    if model_bert_cfg.feature_num > dataset_cfg.dimension:
-        print("Bad Crossnum in model cfg")
-        sys.exit()
-    set_seeds(train_cfg.seed)
-    data = np.load(args.data_path).astype(np.float32)
-    labels = np.load(args.label_path).astype(np.float32)
-    return data, labels, train_cfg, model_bert_cfg, model_classifier_cfg, mask_cfg, dataset_cfg
-
 
 def count_model_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)

@@ -4,7 +4,7 @@ LIMU-BERT adopts the principle of self-supervised training of the natural langua
 
 Please check our paper for more details.
 ## File Overview
-This contains 9 python files.
+This project contains following folders and files.
 - [`config`](./config) : config json files of models and training hyper-parameters.
 - [`dataset`](./dataset) : the scripts for preprocessing four open datasets and a config file of key attributes of those datasets.
 - [`benchmark.py`](./benchmark.py) : run DCNN, DeepSense, and R-GRU.
@@ -142,6 +142,9 @@ In the main function of [`benchmark.py`](./benchmark.py), the parameters are sam
 
 ## Citation
 LIMU-BERT: Unleashing the Potential of Unlabeled Data for IMU Sensing Applications
+
+## Reference
+The implementation of BERT part refers the codes of [ALBERT](https://github.com/dhlee347/pytorchic-bert).
 
 ## Contact
 huatao001@e.ntu.edu.sg (preferred)

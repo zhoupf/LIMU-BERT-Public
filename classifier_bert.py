@@ -3,7 +3,7 @@
 # @Time    : 2020/9/16 11:20
 # @Author  : Huatao
 # @Email   : 735820057@qq.com
-# @File    : pretrain_base.py
+# @File    : classifier_bert.py
 # @Description :
 import argparse
 
