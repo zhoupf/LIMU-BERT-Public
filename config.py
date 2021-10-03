@@ -184,16 +184,6 @@ def load_dataset_stats(dataset, version):
         return None
 
 
-def load_classifier_tradition_config(model, version):
-    path = 'config/classifier_tradition.json'
-    classifier_config_all = json.load(open(path, "r"))
-    name = model + "_" + version
-    if name in classifier_config_all:
-        return classifier_config_all[name]
-    else:
-        return None
-
-
 def load_dataset_label_names(dataset_config, label_index):
     for p in dir(dataset_config):
         if getattr(dataset_config, p) == label_index and "label_index" in p:

@@ -66,19 +66,19 @@ def classify_embeddings(args, data, labels, label_index, training_rate, label_ra
 
 
 if __name__ == "__main__":
-    label_index = 0
-    training_rate = 0.8
-    label_rate = 0.01
+
+    training_rate = 0.8 # unlabeled sample / total sample
+    label_rate = 0.01 # labeled sample / unlabeled sample
     balance = True
 
     mode = "base"
     method = "gru"
     args = handle_argv('classifier_' + mode + "_" + method, 'train.json', method)
     embedding, labels = load_embedding_label(args.model_file, args.dataset, args.dataset_version)
-    label_test, label_estimate_test = classify_embeddings(args, embedding, labels, label_index,
+    label_test, label_estimate_test = classify_embeddings(args, embedding, labels, args.label_index,
                                                           training_rate, label_rate, balance=balance, method=method)
 
-    label_names, label_num = load_dataset_label_names(args.dataset_cfg, label_index)
+    label_names, label_num = load_dataset_label_names(args.dataset_cfg, args.label_index)
     acc, matrix, f1 = stat_results(label_test, label_estimate_test)
     matrix_norm = plot_matrix(matrix, label_names)
 

@@ -427,7 +427,7 @@ class LIBERTDataset4Reconstruction(Dataset):
 def handle_argv(target, config_train, prefix):
     parser = argparse.ArgumentParser(description='PyTorch LIMU-BERT Model')
     parser.add_argument('model_version', type=str, help='Model config')
-    parser.add_argument('dataset', type=str, help='Dataset name', choices=['hhar', 'motion', 'uci', 'shoaib', 'merge'])
+    parser.add_argument('dataset', type=str, help='Dataset name', choices=['hhar', 'motion', 'uci', 'shoaib'])
     parser.add_argument('dataset_version',  type=str, help='Dataset version', choices=['10_100', '20_120'])
     parser.add_argument('-g', '--gpu', type=str, default=None, help='Set specific GPU')
     parser.add_argument('-f', '--model_file', type=str, default=None, help='Pretrain model file')
@@ -438,19 +438,23 @@ def handle_argv(target, config_train, prefix):
                         help='Label Index')
     parser.add_argument('-s', '--save_model', type=str, default='model',
                         help='The saved model name')
-    args = parser.parse_args()
-    model_cfg = load_model_config(target, prefix, args.model_version)
-    if model_cfg is None:
-        print("Unable to find corresponding model config!")
-        sys.exit()
-    args.model_cfg = model_cfg
-    dataset_cfg = load_dataset_stats(args.dataset, args.dataset_version)
-    if dataset_cfg is None:
-        print("Unable to find corresponding dataset config!")
-        sys.exit()
-    args.dataset_cfg = dataset_cfg
-    args = create_io_config(args, args.dataset, args.dataset_version, pretrain_model=args.model_file, target=target)
-    return args
+    try:
+        args = parser.parse_args()
+        model_cfg = load_model_config(target, prefix, args.model_version)
+        if model_cfg is None:
+            print("Unable to find corresponding model config!")
+            sys.exit()
+        args.model_cfg = model_cfg
+        dataset_cfg = load_dataset_stats(args.dataset, args.dataset_version)
+        if dataset_cfg is None:
+            print("Unable to find corresponding dataset config!")
+            sys.exit()
+        args.dataset_cfg = dataset_cfg
+        args = create_io_config(args, args.dataset, args.dataset_version, pretrain_model=args.model_file, target=target)
+        return args
+    except:
+        parser.print_help()
+        sys.exit(0)
 
 
 def handle_argv_simple():

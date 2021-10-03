@@ -66,7 +66,6 @@ def bert_classify(args, label_index, training_rate, label_rate, frozen_bert=Fals
 
 
 if __name__ == "__main__":
-    label_index = 0
     train_rate = 0.8
     label_rate = 0.01
     balance = True
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     args = handle_argv('bert_classifier_' + method, 'bert_classifier_train.json', method)
     if args.label_index != -1:
         label_index = args.label_index
-    label_test, label_estimate_test = bert_classify(args, label_index, train_rate, label_rate
+    label_test, label_estimate_test = bert_classify(args, args.label_index, train_rate, label_rate
                                                     , frozen_bert=frozen_bert, balance=balance)
 
 

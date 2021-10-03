@@ -71,11 +71,10 @@ if __name__ == "__main__":
     balance = True
     label_rate = 0.01
     method = "gru"
-    label_index = 0
 
     args = handle_argv('bench_' + method, 'train.json', method)
-    label_test, label_estimate_test = classify_benchmark(args, label_index, train_rate, label_rate, balance=balance, method=method)
+    label_test, label_estimate_test = classify_benchmark(args, args.label_index, train_rate, label_rate, balance=balance, method=method)
 
-    label_names, label_num = load_dataset_label_names(args.dataset_cfg, label_index)
+    label_names, label_num = load_dataset_label_names(args.dataset_cfg, args.label_index)
     acc, matrix, f1 = stat_results(label_test, label_estimate_test)
     matrix_norm = plot_matrix(matrix, label_names)

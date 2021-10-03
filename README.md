@@ -16,12 +16,11 @@ This contains 9 python files.
 - [`plot.py`](./plot.py) : some helper function for plotting IMU sensor data or learned representations.
 - [`pretrain.py`](./pretrain.py) : pretrain LIMU-BERT.
 - [`statistic.py`](./statistic.py) : some helper functions for evaluation.
-- [`tpn.py`](./tpn.py) : run TPN.
 - [`train.py`](./train.py) : several helper functions for training models.
 - [`utils.py`](./utils.py) : some helper functions for preprocessing data or separating dataset.
 
 ## Setup
-This repository has be tested for Python 3.8.5 and Pytorch 1.5.1 and 1.7.1. To install all dependencies, use the following command:
+This repository has be tested for Python 3.7.7/3.8.5 and Pytorch 1.5.1/1.7.1. To install all dependencies, use the following command:
 
 ```
 $ pip install -r requirements.txt
@@ -39,35 +38,113 @@ Each script has a kernel function which transform the raw IMU data and output pr
 - Data: a numpy array with the shape of (N\*W\*F), N is the number of samples, W is the windows size, and F is the number of features (6 or 9).
 - Label: a numpy array with the shape of (N\*W\*L), N is the number of samples, W is the windows size, and L is the number of label types (e.g., activity and user label). The detailed label information is provied in [`data_config.json`](./dataset/data_config.json).
 
-The two numpy arrays are saved as "data_X_Y.npy" and "label_X_Y.npy" in each dataset folder, where X represents the sampling rate and Y is the window size. For example, all data and label are saved as "data_20_120.npy" and "label_20_120.npy" in our experiments and the data and label arrays of HHAR dataset are saved in the dataset/hhar folder.
+The two numpy arrays are saved as "data_X_Y.npy" and "label_X_Y.npy" in each dataset folder, where X represents the sampling rate and Y is the window size. 
+For example, all data and label are saved as "data_20_120.npy" and "label_20_120.npy" in our experiments and the data and label arrays of HHAR dataset are saved in the _dataset/hhar_ folder.
 
 ## Framework
+In our framework, there are two phases:
+- Self-supervised training phase: train LIMU-BERT with unlabeled IMU data.
+- Supervised training phase: train LIMU-GRU based on the learned representations.
 
+In implementation, there are three steps to run the codes:
+- [`pretrain.py`](./pretrain.py) : pretrain LIMU-BERT.
+- [`embedding.py`](./embedding.py) : generates and save representations learned by LIMU-BERT.
+- [`classifier.py`](./classifier.py) : load representations and train a task-specific classifier.
+
+For other baseline models, directly run [`benchmark.py`](./benchmark.py) or [`tpn.py`](./tpn.py).
 ## Usage
-usage: pretrain_base.py [-h] [-g GPU] [-f MODEL_FILE] [-t TRAIN_CFG] [-m MODEL_CFG] [-a MASK_CFG] {eleme,hhar,huawei,motion,uci,wisdm} {10_100,20_120}
-
-PyTorch LIMU-BERT Model
+[`pretrain.py`](./pretrain.py), [`embedding.py`](./embedding.py), [`classifier.py`](./classifier.py), 
+[`benchmark.py`](./benchmark.py), and [`classifier_bert.py`](./classifier_bert.py) share the same usage pattern.
+```
+usage: xxx.py [-h] [-g GPU] [-f MODEL_FILE] [-t TRAIN_CFG] [-a MASK_CFG]
+                   [-l LABEL_INDEX] [-s SAVE_MODEL]
+                   model_version {hhar,motion,uci,shoaib} {10_100,20_120}
 
 positional arguments:
-  {eleme,hhar,huawei,motion,uci,wisdm}
+  model_version         Model config, e.g. v1
+  {hhar,motion,uci,shoaib}
                         Dataset name
   {10_100,20_120}       Dataset version
 
 optional arguments:
-
   -h, --help            show this help message and exit
-
   -g GPU, --gpu GPU     Set specific GPU
+  -f MODEL_FILE, --model_file MODEL_FILE
+                        Pretrain model file, default: None
+  -t TRAIN_CFG, --train_cfg TRAIN_CFG
+                        Training config json file path
+  -a MASK_CFG, --mask_cfg MASK_CFG
+                        Mask strategy json file path, default: config/mask.json
+  -l LABEL_INDEX, --label_index LABEL_INDEX
+                        Label Index setting the task, default: -1
+  -s SAVE_MODEL, --save_model SAVE_MODEL
+                        The saved model name, default: 'model'
+```
+### [`pretrain.py`](./pretrain.py)
+Example:
+```
+pretrain.py v1 uci 20_120 -s limu_v1 
+```
+For this command, we will train a LIMU-BERT, whose settings are defined in the _based_v1_ of [`limu_bert.json`](./config/limu_bert.json),
+with the UCI dataset "data_20_120.npy" and "label_20_120.npy". The trained model will be saved as "limu_v1.pt" in the _saved/pretrain_base_uci_20_120_ folder.
+The mask and train settings are defined in the [`mask.json`](./config/mask.json) and [`pretrain.json`](./config/pretrain.json), respectively.
 
-  -f MODEL_FILE, --model_file MODEL_FILE        Pretrain model file
+In the main function of [`pretrain.py`](./pretrain.py), you can set following parameters:
+- _training_rate_: float, defines the proportion of unlabeled training data we want to use. The default value is 0.8.
+### [`embedding.py`](./embedding.py)
+Example:
+```
+embedding.py v1 uci 20_120 -f limu_v1
+```
+For this command, we will load the pretrained LIMU-BERT from file "limu_v1.pt" in the _saved/pretrain_base_uci_20_120_ folder.
+And embedding.py will save the learned representations as "embed_limu_v1_uci_20_120.npy" in the _embed_ folder.
 
-  -t TRAIN_CFG, --train_cfg TRAIN_CFG       Training config json file path
+### [`classifier.py`](./classifier.py)
+Example:
+```
+classifier.py v2 uci 20_120 -f limu_v1 -s limu_gru_v1 -l 0
+```
+For this command, we will load the embeddings or representations from "embed_limu_v1_uci_20_120.npy" and train the GRU classifier
+, whose settings are defined in the _gru_v2_ of [`classifier.json`](./config/classifier.json). 
+The trained GRU classifier will saved as "limu_gru_v1.pt" in the _saved/classifier_base_uci_20_120_ folder.
+The target task corresponds to the first label in "label_20_120.npy" of UCI dataset, which is a human activity recognition task defined in [`data_config.json`](./dataset/data_config.json).
+The train settings are defined in the [`train.json`](./config/train.json).
 
-  -m MODEL_CFG, --model_cfg MODEL_CFG       Model config json file path
+In the main function of [`classifier.py`](./classifier.py), you can set following parameters:
+- _training_rate_: float, defines the proportion of unlabeled data that the pretrained LIMU-BERT uses. The default value is 0.8. 
+Note that this value must equal to the _training_rate_ in the [`pretrain.py`](./pretrain.py).
+- _label_rate_: float, defines the proportion of labeled data to the unlabeled training data that the pretrained LIMU-BERT uses.
+- _balance_: bool, defines whether it should use balanced labeled sample among the multiple classes. Default: True.
+- _method_: str, defines the classifier type from {gru, lstm, cnn1, cnn2, attn}. Default: gru.
 
-  -a MASK_CFG, --mask_cfg MASK_CFG      Mask strategy json file path
+If you are confused about the above settings, please check the Section 4.1.1 in our paper for more details.
 
-## Cite
+### [`classifier_bert.py`](./classifier_bert.py)
+Example:
+```
+classifier_bert.py v1_v2 uci 20_120 -f limu_v1 -s limu_gru_v1 -l 0
+```
+For this command, we will train the a composite classifier with pretrained LIMU-BERT and GRU classifier
+, whose settings are defined in the _gru_v2_ of [`classifier.json`](./config/classifier.json). 
+The trained LIMU-GRU classifier will saved as "limu_gru_v1.pt" in the _saved/bert_classifier_base_uci_20_120_ folder.
+The train settings are defined in the [`bert_classifier_train.json`](./config/bert_classifier_train.json). 
+Note that "v1_v2" defines two model versions, which corresponds to the LIMU-BERT and GRU classifier, respectively.
+### [`benchmark.py`](./benchmark.py)
+Example:
+```
+benchmark.py v1 uci 20_120 -s dcnn_v1 -l 0
+```
+For this command, we will train a DCNN model, whose settings are defined in the _dcnn_v1_ of [`classifier.json`](./config/classifier.json). 
+The trained DCNN classifier will saved as "dcnn_v1.pt" in the _saved/bench_dcnn_uci_20_120_ folder.
+
+In the main function of [`benchmark.py`](./benchmark.py), the parameters are same to those in [`classifier.py`](./classifier.py).
+
+
+## Citation
 LIMU-BERT: Unleashing the Potential of Unlabeled Data for IMU Sensing Applications
 
+## Contact
+huatao001@e.ntu.edu.sg (preferred)
+
+735820057@qq.com
 
