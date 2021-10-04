@@ -42,14 +42,11 @@ def main(args, training_rate):
     device = get_device(args.gpu)
     trainer = train.Trainer(train_cfg, model, optimizer, args.save_path, device)
 
-    # writer = SummaryWriter(log_dir=args.log_dir)
+    def func_loss(model, batch):
+        mask_seqs, masked_pos, seqs = batch #
 
-    def func_loss(model, batch): # make sure loss is tensor
-        mask_seqs, masked_pos, seqs = batch #, mask_norms
-
-        logits_lm = model(mask_seqs, masked_pos) #, mask_norms
-        loss_lm = criterion(logits_lm, seqs) # for masked LM
-        # loss_lm = (loss_lm.float()).mean()
+        seq_recon = model(mask_seqs, masked_pos) #
+        loss_lm = criterion(seq_recon, seqs) # for masked LM
         return loss_lm
 
     def func_forward(model, batch):

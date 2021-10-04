@@ -30,7 +30,8 @@
 
 ## Training Config
 
-[`pretrain.json`](./pretrain.json)
+[`pretrain.json`](./pretrain.json) and [`train.json`](./train.json) have the same structure. 
+Note that they must have the same random seed.
 ```
 {
     "seed": 3431, random seed

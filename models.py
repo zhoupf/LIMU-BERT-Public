@@ -162,7 +162,6 @@ class LIMUBertModel4Pretrain(nn.Module):
     def __init__(self, cfg, output_embed=False):
         super().__init__()
         self.transformer = Transformer(cfg)
-        # self.transformer = TransformerTemp(cfg)
         self.fc = nn.Linear(cfg.hidden, cfg.hidden)
         self.linear = nn.Linear(cfg.hidden, cfg.hidden)
         self.activ = gelu
@@ -181,31 +180,6 @@ class LIMUBertModel4Pretrain(nn.Module):
         h_masked = self.norm(h_masked)
         logits_lm = self.decoder(h_masked)
         return logits_lm
-
-
-class LIMUBert4Embedding(nn.Module):
-
-    def __init__(self, cfg, output_embed=False):
-        super().__init__()
-        self.transformer = Transformer(cfg)
-        self.fc = nn.Linear(cfg.hidden, cfg.hidden)
-        self.linear = nn.Linear(cfg.hidden, cfg.hidden)
-        self.activ = gelu
-        self.norm = LayerNorm(cfg)
-        self.decoder1 = nn.Linear(cfg.hidden, cfg.feature_num)
-        self.output_embed = output_embed
-
-    def forward(self, input_seqs):
-        h_masked = self.transformer(input_seqs)
-        return h_masked
-
-    def load_self(self, model_file, map_location=None):
-        state_dict = self.state_dict()
-        model_dicts = torch.load(model_file, map_location=map_location).items()
-        for k, v in model_dicts:
-            if k in state_dict:
-                state_dict.update({k: v})
-        self.load_state_dict(state_dict)
 
 
 class ClassifierLSTM(nn.Module):
